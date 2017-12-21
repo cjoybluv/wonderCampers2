@@ -1,11 +1,21 @@
 import React, { Component } from 'react';
 
-import { SelectField, MenuItem, List, ListItem } from 'material-ui';
+import { SelectField, MenuItem, List, ListItem, Divider } from 'material-ui';
 
 import './Discover.css';
 import searchTables from '../helpers/searchTables';
 import mt_lake from '../images/mt_lake.jpg';
 
+function importAll(r) {
+  let images = {};
+  r.keys().map((item, index) => { 
+    images[item.replace('./', '')] = r(item); 
+    return true;
+  });
+  return images;
+}
+
+const images = importAll(require.context('../images', false, /\.(png|jpe?g|svg)$/));
 
 const styles = {
  width200: {
@@ -37,6 +47,17 @@ class Discover extends Component {
     this.props.fetchRecAreas(value);
   }
 
+  activityIconListItem = (activity, i) => {
+    console.log('activity',activity);
+    let iconName = 'acticon-'+activity.ActivityID.toString()+'.png';
+    return (
+      <section className="activity-icon" key={i} >
+        {/* <img src={images['icon-4.png']} alt={activity.ActivityName} /> */}
+        <img src={images[iconName]} alt={activity.ActivityName} />
+        <span className="activity-label">{activity.ActivityName}</span>
+      </section> 
+    )
+  }
   
   render() {
     const { isFetching, recareas, selectedState } = this.state;
@@ -102,8 +123,11 @@ class Discover extends Component {
                   {recareas.map((recarea, i) =>
                     <ListItem key={i}>
                       <div>
-                        <h3>{recarea.RecAreaName} </h3>
+                        <h4>{recarea.RecAreaName} ({recarea.FACILITY ? recarea.FACILITY.length : 'N/A'})</h4>
+                        <p dangerouslySetInnerHTML={{__html: recarea.RecAreaDescription}} />
+                        {recarea.ACTIVITY.map(this.activityIconListItem)}
                       </div>
+                      {(i+1 !== recareas.length) && <Divider />}
                     </ListItem>
                   )}
                 </List>

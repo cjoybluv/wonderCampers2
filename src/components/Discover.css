@@ -14,3 +14,18 @@
   vertical-align: top;
 }
 
+.activity-icon {
+  display: inline-block;
+  margin: 5px 10px;
+}
+
+.activity-icon img {
+  width: 25px;
+  max-height: 25px;
+  margin-right: 10px;
+}
+
+.activity-icon span {
+  font-size: 0.5em;
+  vertical-align: bottom;
+}
