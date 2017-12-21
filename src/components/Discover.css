@@ -1,0 +1,16 @@
+.container {
+  margin: 5px;
+}
+
+.col-4 {
+  display: inline-block;
+  width: 33%;
+  vertical-align: top;
+}
+
+.col-8 {
+  display: inline-block;
+  width: 66%;
+  vertical-align: top;
+}
+
