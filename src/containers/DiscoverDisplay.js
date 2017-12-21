@@ -6,8 +6,7 @@ import { fetchRecAreas } from '../actions/discoverActions';
 
 const mapStateToDiscoverProps = (state) => (
   {
-    state: state.selectedState,
-    recareas: state.recareas
+    discoverProps: state.discoverProps
   }
 );
 
@@ -20,15 +19,8 @@ const mapDispatchToDiscoverProps = (dispatch) => (
   }
 );
 
-const mergeDiscoverProps = (stateProps, dispatchProps) => (
-  {
-    ...stateProps,
-    ...dispatchProps,
-  }
-);
 
 export default connect(
   mapStateToDiscoverProps,
-  mapDispatchToDiscoverProps,
-  mergeDiscoverProps
+  mapDispatchToDiscoverProps
 )(Discover);

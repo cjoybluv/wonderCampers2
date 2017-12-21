@@ -26,8 +26,8 @@ class Discover extends Component {
 
   componentWillReceiveProps(update) {
     this.setState({
-      isFetching: update.recareas.isFetching,
-      recareas: update.recareas.recareas
+      isFetching: update.discoverProps.isFetching,
+      recareas: update.discoverProps.recareas
     });
   }
 
@@ -110,9 +110,6 @@ class Discover extends Component {
               </div>      
             </div>
           }
-          <pre>RECAREAS: {JSON.stringify(recareas.length)}</pre>
-          <pre>isFetching: {isFetching.toString()}</pre>
-
         </span>
       </div>
     )

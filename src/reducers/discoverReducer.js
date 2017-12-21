@@ -1,6 +1,6 @@
 import { FETCH_RECAREAS_REQUEST, FETCH_RECAREAS_SUCCESS } from '../actions/discoverActions';
 
-const recareas = (state = {
+const discoverProps = (state = {
   isFetching: false,
   selectedState: '',
   recareas: []
@@ -24,4 +24,4 @@ const recareas = (state = {
   }
 }
 
-export default recareas;
+export default discoverProps;

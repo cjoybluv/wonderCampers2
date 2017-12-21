@@ -10,7 +10,7 @@ import {
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import { AppBar, Drawer, MenuItem } from 'material-ui';
 
-import logo from '../images/REI_logo.gif';
+import logo from '../images/REI-logo-transparent.png';
 import './App.css';
 
 import Home from './Home';
@@ -32,6 +32,7 @@ class App extends Component {
           <Router>
             <div className="App">
               <AppBar 
+                className="AppBar"
                 onLeftIconButtonClick={this.handleToggle}
                 title="wonderCampers">
                 <Drawer open={this.state.open} >

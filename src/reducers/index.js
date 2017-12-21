@@ -2,12 +2,12 @@ import { combineReducers } from 'redux'
 
 import selectedSubreddit from './selectReducer';
 import postsBySubreddit from './postsReducer';
-import recareas from './discoverReducer';
+import discoverProps from './discoverReducer';
 
 const rootReducer = combineReducers({
   postsBySubreddit,
   selectedSubreddit,
-  recareas
+  discoverProps
 })
 
 export default rootReducer
