@@ -1,6 +1,17 @@
 import React, { Component } from 'react';
 
-import { SelectField, MenuItem, List, ListItem, Divider } from 'material-ui';
+import { 
+  SelectField, 
+  MenuItem, 
+  List, 
+  ListItem, 
+  Divider, 
+  Dialog,
+  FlatButton,
+  Chip
+} from 'material-ui';
+
+import {Card, CardText} from 'material-ui/Card';
 
 import './Discover.css';
 import searchTables from '../helpers/searchTables';
@@ -21,6 +32,10 @@ const styles = {
  width200: {
     width: 200,
   },
+  chip: {
+    margin: 4,
+    display: "inline-block"
+  },
 };
 
 class Discover extends Component {
@@ -30,7 +45,8 @@ class Discover extends Component {
     this.state = {
       isFetching: false,
       selectedState: '', 
-      recareas: []
+      recareas: [],
+      recAreaOpen: false
     };
   }
 
@@ -48,19 +64,111 @@ class Discover extends Component {
   }
 
   activityIconListItem = (activity, i) => {
-    console.log('activity',activity);
-    let iconName = 'acticon-'+activity.ActivityID.toString()+'.png';
+    const iconName = 'acticon-'+activity.ActivityID.toString()+'.png';
     return (
       <section className="activity-icon" key={i} >
-        {/* <img src={images['icon-4.png']} alt={activity.ActivityName} /> */}
         <img src={images[iconName]} alt={activity.ActivityName} />
         <span className="activity-label">{activity.ActivityName}</span>
       </section> 
     )
   }
+
+  openRecArea = (recArea) => {
+    this.setState({
+      recAreaOpen: true,
+      recArea
+    });
+  }
+
+  closeRecArea = () => {
+    this.setState({recAreaOpen: false});
+  }
   
+  renderRecAreas() {
+    const { recareas } = this.state;
+    return (
+      <List>
+        {recareas.map((recarea, i) =>
+          <div key={i} >
+            <ListItem onClick={this.openRecArea.bind(this,recarea)} >
+              <div recarea={recarea} >
+                <h4>{recarea.RecAreaName} ({recarea.FACILITY ? recarea.FACILITY.length : 'N/A'})</h4>
+                <p dangerouslySetInnerHTML={{__html: recarea.RecAreaDescription}} />
+                {recarea.ACTIVITY.map(this.activityIconListItem)}
+              </div>
+              {(i+1 !== recareas.length) && <Divider />}
+            </ListItem>
+          </div>
+        )}
+      </List>
+    )
+  }
+
+  renderRecAreaModal() {
+    const { recArea, recAreaOpen } = this.state;
+    if (!recAreaOpen) {
+      return null;
+    }
+    return (
+      <div className="modal">
+        <h3>{recArea.RecAreaName} ({recArea.FACILITY.length})</h3>
+
+        <div>
+          <div className="col-6">
+            <Card ng-if="recArea.RECAREAADDRESS[0].City">
+              <CardText>
+                {recArea.RECAREAADDRESS[0].RecAreaStreetAddress1} <br/>
+                {recArea.RECAREAADDRESS[0].City}, {recArea.RECAREAADDRESS[0].AddressStateCode}   {recArea.RECAREAADDRESS[0].PostalCode} <br/>
+                {recArea.RecAreaEmail} {recArea.RecAreaPhone}<br/>
+                {recArea.RecAreaMapURL &&
+                  <button href={recArea.RecAreaMapURL} target="_blank">Goto Map</button>
+                }
+              </CardText>
+            </Card>
+          </div>
+          <div className="col-6" ng-if="recArea.MEDIA && recArea.MEDIA[0].MediaType=='Image'">
+            <img src={recArea.MEDIA[0].URL} alt="" />
+          </div>
+        </div>        
+        <Chip style={styles.chip}>
+          ACTIVITY: {recArea.ACTIVITY.length}
+        </Chip>
+        <Chip style={styles.chip}>
+          FACILITY: {recArea.FACILITY.length}
+        </Chip>
+        <Chip style={styles.chip}>
+          LINK: {recArea.LINK.length}
+        </Chip>
+        <Chip style={styles.chip}>
+          MEDIA: {recArea.MEDIA.length}
+        </Chip>
+        <Chip style={styles.chip}>
+          EVENT: {recArea.EVENT.length}
+        </Chip>
+
+
+
+
+      </div>
+    )
+  }
+
   render() {
-    const { isFetching, recareas, selectedState } = this.state;
+    const { isFetching, recareas, selectedState, recAreaOpen } = this.state;
+
+    const modalActions = [
+      <FlatButton
+        label="Cancel"
+        primary={true}
+        onClick={this.closeRecArea}
+      />,
+      <FlatButton
+        label="Submit"
+        primary={true}
+        keyboardFocused={true}
+        onClick={this.closeRecArea}
+      />,
+    ];
 
     return (
       <div className="container">
@@ -119,22 +227,21 @@ class Discover extends Component {
                 Recreational Areas in <strong>{ selectedState }</strong>: ({ recareas.length })
               </h3>
               <div>
-                <List>
-                  {recareas.map((recarea, i) =>
-                    <ListItem key={i}>
-                      <div>
-                        <h4>{recarea.RecAreaName} ({recarea.FACILITY ? recarea.FACILITY.length : 'N/A'})</h4>
-                        <p dangerouslySetInnerHTML={{__html: recarea.RecAreaDescription}} />
-                        {recarea.ACTIVITY.map(this.activityIconListItem)}
-                      </div>
-                      {(i+1 !== recareas.length) && <Divider />}
-                    </ListItem>
-                  )}
-                </List>
+                {this.renderRecAreas()}
               </div>      
             </div>
           }
         </span>
+        <Dialog
+          actions={modalActions}
+          title="Recreational Area:"
+          modal={false}
+          open={recAreaOpen}
+          onRequestClose={this.closeRecArea}
+          autoScrollBodyContent={true}
+        >
+          {this.renderRecAreaModal()}
+        </Dialog>
       </div>
     )
   }

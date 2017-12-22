@@ -8,10 +8,24 @@
   vertical-align: top;
 }
 
+.col-6 {
+  display: inline-block;
+  width: 50%;
+  vertical-align: top;
+}
+
 .col-8 {
   display: inline-block;
   width: 66%;
   vertical-align: top;
+}
+
+h4 {
+  font-weight: 400;
+}
+
+p {
+  font-size: 14px;
 }
 
 .activity-icon {
@@ -28,4 +42,16 @@
 .activity-icon span {
   font-size: 0.5em;
   vertical-align: bottom;
+}
+
+.modal img {
+  width: 250px;
+  position: absolute;
+  right: 25px;
+  top: 25px;
+  vertical-align: top;
+}
+
+Chip {
+  display: inline-block;
 }
