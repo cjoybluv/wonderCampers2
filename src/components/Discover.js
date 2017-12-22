@@ -50,21 +50,30 @@ class Discover extends Component {
       isFetching: false,
       selectedState: '', 
       recareas: [],
-      recAreaOpen: false
+      recAreaOpen: false,
+      selectedRecArea: null,
+      facilities: []
     };
   }
 
   componentWillReceiveProps(update) {
     this.setState({
       isFetching: update.discoverProps.isFetching,
-      recareas: update.discoverProps.recareas
+      recareas: update.discoverProps.recareas,
+      facilities: update.discoverProps.facilities
     });
   }
 
-  handleChange = (event, index, value) => {
+  handleStateSelect = (event, index, value) => {
     this.setState({selectedState: value});
     this.setState({isFetching: true});
     this.props.fetchRecAreas(value);
+  }
+
+  handleRecAreaSelect = (event, index, value) => {
+    this.setState({selectedRecArea: value});
+    this.props.setRecArea(value);
+    this.props.fetchFacilities(value);
   }
 
   activityIconListItem = (activity, i) => {
@@ -178,8 +187,35 @@ class Discover extends Component {
     )
   }
 
+  renderFacilities() {
+    const { facilities } = this.state;
+    return (
+      <List>
+        {facilities.map((facility, i) =>
+          <div key={i} >
+            <ListItem>
+              <div>
+                <h4>{facility.FacilityName}</h4>
+                <p dangerouslySetInnerHTML={{__html: facility.FacilityDescription}} />
+                {false && facility.ACTIVITY.map(this.activityIconListItem)}
+              </div>
+              {(i+1 !== facilities.length) && <Divider />}
+            </ListItem>
+          </div>
+        )}
+      </List>
+    )
+  }
+
   render() {
-    const { isFetching, recareas, selectedState, recAreaOpen } = this.state;
+    const { 
+      isFetching, 
+      recareas, 
+      facilities,
+      selectedState, 
+      recAreaOpen,
+      selectedRecArea
+    } = this.state;
 
     const modalActions = [
       <FlatButton
@@ -203,7 +239,7 @@ class Discover extends Component {
               style={styles.width200}
               floatingLabelText="Select State"
               value={selectedState}
-              onChange={this.handleChange}
+              onChange={this.handleStateSelect}
             >
               {searchTables.usStates.map((st, idx) => {
                 return (
@@ -212,11 +248,35 @@ class Discover extends Component {
               })}
             </SelectField>
           </div>
+          <h4>Browse Facilities by:</h4>
+          {!isFetching && !!recareas.length &&
+            <SelectField 
+              style={styles.width200}
+              floatingLabelText="Select Recretional Area"
+              value={selectedRecArea}
+              onChange={this.handleRecAreaSelect}
+            >
+              {recareas.map((recarea, idx) => {
+                return (
+                  <MenuItem key={idx} value={recarea.RecAreaID} primaryText={recarea.RecAreaName} />
+                )
+              })}
+            </SelectField>
+          }
+
         </span>
         <span className="col-8">
-          {isFetching &&
+          {isFetching && selectedState &&
             <h3>
               Recreational Areas in <strong>{ selectedState }</strong>:
+              <div>
+                <strong>LOADING...</strong>
+              </div>
+            </h3>
+          }
+          {isFetching && selectedRecArea &&
+            <h3>
+              Facilities for: <strong>{ selectedRecArea }</strong>:
               <div>
                 <strong>LOADING...</strong>
               </div>
@@ -246,13 +306,23 @@ class Discover extends Component {
               <div><img src={mt_lake} height="250" alt="mountain lake" /></div>
             </div>
           }
-          {!isFetching && recareas.length &&
+          {!isFetching && !!recareas.length && !facilities.length &&
             <div>
                <h3>
                 Recreational Areas in <strong>{ selectedState }</strong>: ({ recareas.length })
               </h3>
               <div>
                 {this.renderRecAreas()}
+              </div>      
+            </div>
+          }
+          {!isFetching && !!facilities.length &&
+            <div>
+              <h3>
+               Facilities for: <strong>{ selectedRecArea }</strong>:
+              </h3>
+              <div>
+                {this.renderFacilities()}
               </div>      
             </div>
           }

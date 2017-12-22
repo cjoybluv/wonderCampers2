@@ -1,10 +1,17 @@
-import { FETCH_RECAREAS_REQUEST, FETCH_RECAREAS_SUCCESS, RECAREA_SELECT } from '../actions/discoverActions';
+import { 
+  FETCH_RECAREAS_REQUEST, 
+  FETCH_RECAREAS_SUCCESS, 
+  RECAREA_SELECT,
+  FETCH_FACILITIES_REQUEST,
+  FETCH_FACILITIES_SUCCESS
+} from '../actions/discoverActions';
 
 const discoverProps = (state = {
   isFetching: false,
   selectedState: '',
   recareas: [],
-  selectedRecarea: {}
+  selectedRecarea: {},
+  facilities: []
 }, action) => {
   switch (action.type) {
     case FETCH_RECAREAS_REQUEST:
@@ -23,7 +30,19 @@ const discoverProps = (state = {
     case RECAREA_SELECT:
       return {
         ...state,
-        selectedRecarea: action.recarea
+        selectedRecArea: action.recAreaID
+      }
+    case FETCH_FACILITIES_REQUEST:
+      return {
+        ...state,
+        isFetching: true,
+        facilities: []
+      }
+    case FETCH_FACILITIES_SUCCESS:
+      return {
+        ...state,
+        isFetching: false,
+        facilities: action.facilities
       }
     default:
       return state
