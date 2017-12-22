@@ -8,13 +8,17 @@ import {
   Divider, 
   Dialog,
   FlatButton,
-  Chip
+  Chip,
+  Paper
 } from 'material-ui';
-
 import {Card, CardText} from 'material-ui/Card';
+
+// import ShowMore from 'react-show-more';
+// import Truncate from 'react-truncate';
 
 import './Discover.css';
 import searchTables from '../helpers/searchTables';
+import { char20, prepareURL } from '../helpers/utilities';
 import mt_lake from '../images/mt_lake.jpg';
 
 function importAll(r) {
@@ -68,7 +72,7 @@ class Discover extends Component {
     return (
       <section className="activity-icon" key={i} >
         <img src={images[iconName]} alt={activity.ActivityName} />
-        <span className="activity-label">{activity.ActivityName}</span>
+        <span className="activity-label">{char20(activity.ActivityName)}</span>
       </section> 
     )
   }
@@ -78,6 +82,7 @@ class Discover extends Component {
       recAreaOpen: true,
       recArea
     });
+    this.props.setRecarea(recArea);
   }
 
   closeRecArea = () => {
@@ -113,42 +118,62 @@ class Discover extends Component {
       <div className="modal">
         <h3>{recArea.RecAreaName} ({recArea.FACILITY.length})</h3>
 
-        <div>
+        <div className="recarea-address">
           <div className="col-6">
-            <Card ng-if="recArea.RECAREAADDRESS[0].City">
+            <Card>
               <CardText>
                 {recArea.RECAREAADDRESS[0].RecAreaStreetAddress1} <br/>
                 {recArea.RECAREAADDRESS[0].City}, {recArea.RECAREAADDRESS[0].AddressStateCode}   {recArea.RECAREAADDRESS[0].PostalCode} <br/>
                 {recArea.RecAreaEmail} {recArea.RecAreaPhone}<br/>
                 {recArea.RecAreaMapURL &&
-                  <button href={recArea.RecAreaMapURL} target="_blank">Goto Map</button>
+                  <a href={prepareURL(recArea.RecAreaMapURL)} target="_blank">Goto Map</a>
                 }
               </CardText>
             </Card>
           </div>
-          <div className="col-6" ng-if="recArea.MEDIA && recArea.MEDIA[0].MediaType=='Image'">
-            <img src={recArea.MEDIA[0].URL} alt="" />
-          </div>
-        </div>        
-        <Chip style={styles.chip}>
-          ACTIVITY: {recArea.ACTIVITY.length}
-        </Chip>
-        <Chip style={styles.chip}>
-          FACILITY: {recArea.FACILITY.length}
-        </Chip>
-        <Chip style={styles.chip}>
-          LINK: {recArea.LINK.length}
-        </Chip>
-        <Chip style={styles.chip}>
-          MEDIA: {recArea.MEDIA.length}
-        </Chip>
-        <Chip style={styles.chip}>
-          EVENT: {recArea.EVENT.length}
-        </Chip>
-
-
-
-
+          {recArea.MEDIA[0] && recArea.MEDIA[0].MediaType==='Image' &&
+            <div className="col-6">
+              <img src={recArea.MEDIA[0].URL} alt="" />
+            </div>
+          }
+        </div>  
+        <div>
+          <Chip style={styles.chip}>
+            ACTIVITY: {recArea.ACTIVITY.length}
+          </Chip>
+          <Chip style={styles.chip}>
+            FACILITY: {recArea.FACILITY.length}
+          </Chip>
+          <Chip style={styles.chip}>
+            LINK: {recArea.LINK.length}
+          </Chip>
+          <Chip style={styles.chip}>
+            MEDIA: {recArea.MEDIA.length}
+          </Chip>
+          <Chip style={styles.chip}>
+            EVENT: {recArea.EVENT.length}
+          </Chip>
+        </div>
+        <Paper zDepth={1}>
+          <h3>Description</h3>
+          <p dangerouslySetInnerHTML={{__html: recArea.RecAreaDescription}} />
+        </Paper>
+        <Paper zDepth={1}>
+          <h3>Directions</h3>
+          <p dangerouslySetInnerHTML={{__html: recArea.RecAreaDirections}} />
+        </Paper>
+        <Paper>
+          <h3>Activities</h3>
+          {recArea.ACTIVITY.map(this.activityIconListItem)}
+        </Paper>
+        <Paper>
+          <h3>Links</h3>
+          {recArea.LINK.map((link) => 
+            <Chip style={styles.chip}>
+              <a href={prepareURL(link.URL)} target="_blank">{link.Title}</a>
+            </Chip>            
+          )}
+        </Paper>
       </div>
     )
   }
@@ -234,7 +259,6 @@ class Discover extends Component {
         </span>
         <Dialog
           actions={modalActions}
-          title="Recreational Area:"
           modal={false}
           open={recAreaOpen}
           onRequestClose={this.closeRecArea}

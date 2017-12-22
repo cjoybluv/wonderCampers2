@@ -10,7 +10,9 @@
 
 .col-6 {
   display: inline-block;
-  width: 50%;
+  margin-right: 20px;
+  margin-bottom: 20px;
+  width: 45%;
   vertical-align: top;
 }
 
@@ -44,12 +46,14 @@ p {
   vertical-align: bottom;
 }
 
-.modal img {
-  width: 250px;
-  position: absolute;
-  right: 25px;
-  top: 25px;
+.recarea-address {
+  position: relative;
+}
+
+.recarea-address img {
+  max-width: 250px;
   vertical-align: top;
+  float: right;
 }
 
 Chip {

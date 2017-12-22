@@ -1,12 +1,13 @@
 export const FETCH_RECAREAS_REQUEST = 'FETCH_RECAREAS_REQUEST';
 export const FETCH_RECAREAS_SUCCESS = 'FETCH_RECAREAS_SUCCESS';
+export const RECAREA_SELECT = 'RECAREA_SELECT';
 
-export const requestRecAreas = state => ({
+const requestRecAreas = state => ({
   type: FETCH_RECAREAS_REQUEST,
-  state: state,
+  state
 })
 
-export const receiveRecareas = (state, recareas) => ({
+const receiveRecareas = (state, recareas) => ({
   type: FETCH_RECAREAS_SUCCESS,
   recareas
 })
@@ -16,4 +17,13 @@ export const fetchRecAreas = selectedState => dispatch => {
   return fetch(`https://ridb.recreation.gov/api/v1/recareas.json?apikey=5722E187D51D46678DC8F5B047FCB82E&full=true&state=${selectedState}`)
     .then((response) => response.json())
     .then((json) => dispatch(receiveRecareas(selectedState,json.RECDATA)))
+}
+
+const selectRecarea = (recarea) => ({
+  type: RECAREA_SELECT,
+  recarea
+})
+
+export const setRecarea = selectedRecarea => dispatch => {
+  dispatch(selectRecarea(selectedRecarea));
 }
