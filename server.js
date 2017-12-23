@@ -7,6 +7,11 @@ const app = express();
 
 app.set('port', (process.env.API_PORT || 3001));
 
+app.use((req, res, next) => {
+  res.append('Access-Control-Allow-Origin', ['*']);
+  next();
+});
+
 app.get('/api/info', (req, res) => {
   res.json({"hello": "Hello World!"})
 });
@@ -31,16 +36,13 @@ app.get('/api/recareas', (req, res) => {
              full:true
            }
          },function(error,response,body) {
-           // console.log('response received ' + pageOffset);
            pageOffset++;
            if(!error && response.statusCode === 200) {
              myData = myData.concat(JSON.parse(body).RECDATA);
              totalCount = JSON.parse(body).METADATA.RESULTS.TOTAL_COUNT;
              if (myData.length >= totalCount) {
-               // console.log('totalCount reached');
                outOfData = true;
              }
-             // setTimeout(callback, 5);
              callback(null);
            } else {
              res.json({
@@ -52,7 +54,6 @@ app.get('/api/recareas', (req, res) => {
          });
        },
        function (err) {
-         // console.log('async done');
            myData.sort(sortRecareas);
            res.json(myData);
        }
@@ -60,7 +61,7 @@ app.get('/api/recareas', (req, res) => {
 });
 
 app.get('/api/facilities', (req, res) => {
-  var facilityIDs = req.query.facilityIDs;
+  var facilityIDs = req.query.facilityIDs.split(',');
   var state = req.query.state;
   var query = req.query.query;
   var radius = req.query.radius;
@@ -73,7 +74,6 @@ app.get('/api/facilities', (req, res) => {
   }
   if (facilityIDs) {
     async.each(facilityIDs, function(facilityID, callback) {
-      // console.log('Processing facility ',facilityID);
 
       request({
         url:'https://ridb.recreation.gov/api/v1/facilities/'+facilityID.toString(),
@@ -93,7 +93,6 @@ app.get('/api/facilities', (req, res) => {
             }
             callback();
           },function (err) {
-              // console.log('facilities DONE',myData.length);
               myData.sort(sortFacilities);
               res.send(myData);
       });
@@ -101,7 +100,6 @@ app.get('/api/facilities', (req, res) => {
         if( err ) {
           console.log('ERR: RidbController,Async.FacilityIDs',err);
         } else {
-          // console.log('facilities DONE',myData.length);
           myData.sort(sortFacilities);
           res.send(myData);
         }
@@ -110,7 +108,6 @@ app.get('/api/facilities', (req, res) => {
 
   }
   if (query) {
-    // console.log('facilitiesQuery',query,state);
     var outOfData = false;
     var pageOffset = 0;
     var totalCount = 0;
@@ -128,13 +125,11 @@ app.get('/api/facilities', (req, res) => {
             full:true
           }
         },function(error,response,body) {
-          // console.log('response received ',pageOffset,totalCount);
           pageOffset++;
           if(!error && response.statusCode === 200) {
             myData = myData.concat(JSON.parse(body).RECDATA);
             totalCount = JSON.parse(body).METADATA.RESULTS.TOTAL_COUNT;
             if (myData.length >= totalCount) {
-              // console.log('totalCount reached');
               outOfData = true;
             }
             // setTimeout(callback, 5);
@@ -149,7 +144,6 @@ app.get('/api/facilities', (req, res) => {
         });
       },
       function (err) {
-        // console.log('async done');
           myData.sort(sortFacilities);
           res.send(myData);
       }
@@ -158,14 +152,13 @@ app.get('/api/facilities', (req, res) => {
   }
 
   if(radius && placeName) {
-    // console.log('radius & placeName',radius,placeName);
     var coord = {};
     geocoder.geocode(placeName+", "+state, function ( err, data ) {
       if(typeof data.results[0] != 'undefined') {
         coord.lat = data.results[0].geometry.location.lat;
         coord.lng = data.results[0].geometry.location.lng;
       }
-      // console.log('facilities :: radius',coord.lat,coord.lng);
+
       var outOfData = false;
       var pageOffset = 0;
       var totalCount = 0;
@@ -185,14 +178,11 @@ app.get('/api/facilities', (req, res) => {
               full:true
             }
           },function(error,response,body) {
-            // console.log('response received ',pageOffset,totalCount);
             pageOffset++;
             if(!error && response.statusCode === 200) {
               myData = myData.concat(JSON.parse(body).RECDATA);
               totalCount = JSON.parse(body).METADATA.RESULTS.TOTAL_COUNT;
-              // console.log('response code 200 ',totalCount);
               if (myData.length >= totalCount) {
-                // console.log('totalCount reached');
                 outOfData = true;
               }
               // setTimeout(callback, 5);
@@ -207,9 +197,7 @@ app.get('/api/facilities', (req, res) => {
           });
         },
         function (err) {
-          // console.log('async done');
           myData.sort(sortFacilities);
-          // console.log('myData.length',myData.length);
           res.send(myData);
         }
       );

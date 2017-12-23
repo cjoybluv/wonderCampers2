@@ -16,18 +16,18 @@ const receiveRecareas = (state, recareas) => ({
 
 export const fetchRecAreas = selectedState => dispatch => {
   dispatch(requestRecAreas(selectedState))
-  return fetch(`https://ridb.recreation.gov/api/v1/recareas.json?apikey=5722E187D51D46678DC8F5B047FCB82E&full=true&state=${selectedState}`)
+  return fetch(`http://localhost:3001/api/recareas?state=${selectedState}`)
     .then((response) => response.json())
-    .then((json) => dispatch(receiveRecareas(selectedState,json.RECDATA)))
+    .then((json) => dispatch(receiveRecareas(selectedState,json)))
 }
 
-const selectRecArea = (recAreaID) => ({
+const selectRecArea = (recArea) => ({
   type: RECAREA_SELECT,
-  recAreaID
+  recAreaID: recArea.RecAreaID
 })
 
-export const setRecArea = selectedRecarea => dispatch => {
-  dispatch(selectRecArea(selectedRecarea));
+export const setRecArea = selectedRecArea => dispatch => {
+  dispatch(selectRecArea(selectedRecArea));
 }
 
 const requestFacilities = recArea => ({
@@ -42,9 +42,16 @@ const receiveFacilities = (facilities) => ({
 
 export const fetchFacilities = selectedRecArea => dispatch => {
   dispatch(requestFacilities(selectedRecArea))
-  const recAreaID = selectedRecArea.toString();
-  return fetch(`https://ridb.recreation.gov/api/v1/recareas/${recAreaID}/facilities/?apikey=5722E187D51D46678DC8F5B047FCB82E&full=true`)
+  const facilityIDs = getFacilityIDs(selectedRecArea);
+  return fetch(`http://localhost:3001/api/facilities?facilityIDs=${facilityIDs}`)
     .then((response) => response.json())
-    .then((json) => dispatch(receiveFacilities(json.RECDATA)))
+    .then((json) => dispatch(receiveFacilities(json)))
 }
 
+var getFacilityIDs = function(recArea) {
+  var facilityIDs = [];
+  for (var j=0;j<recArea.FACILITY.length;j++) {
+    facilityIDs.push(recArea.FACILITY[j].FacilityID);
+  }
+  return facilityIDs;
+};

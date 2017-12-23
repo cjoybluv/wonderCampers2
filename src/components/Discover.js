@@ -34,7 +34,7 @@ const images = importAll(require.context('../images', false, /\.(png|jpe?g|svg)$
 
 const styles = {
  width200: {
-    width: 200,
+    width: "100%",
   },
   chip: {
     margin: 4,
@@ -258,7 +258,7 @@ class Discover extends Component {
             >
               {recareas.map((recarea, idx) => {
                 return (
-                  <MenuItem key={idx} value={recarea.RecAreaID} primaryText={recarea.RecAreaName} />
+                  <MenuItem key={idx} value={recarea} primaryText={recarea.RecAreaName + ' (' + recarea.FACILITY.length + ')'} />
                 )
               })}
             </SelectField>
@@ -266,7 +266,7 @@ class Discover extends Component {
 
         </span>
         <span className="col-8">
-          {isFetching && selectedState &&
+          {isFetching && selectedState && !selectedRecArea &&
             <h3>
               Recreational Areas in <strong>{ selectedState }</strong>:
               <div>
@@ -276,7 +276,7 @@ class Discover extends Component {
           }
           {isFetching && selectedRecArea &&
             <h3>
-              Facilities for: <strong>{ selectedRecArea }</strong>:
+              Facilities for: <strong>{ selectedRecArea.RecAreaName }</strong>:
               <div>
                 <strong>LOADING...</strong>
               </div>
@@ -319,7 +319,7 @@ class Discover extends Component {
           {!isFetching && !!facilities.length &&
             <div>
               <h3>
-               Facilities for: <strong>{ selectedRecArea }</strong>:
+               Facilities for: <strong>{ selectedRecArea.RecAreaName }</strong>:
               </h3>
               <div>
                 {this.renderFacilities()}

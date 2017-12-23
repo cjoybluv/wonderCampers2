@@ -10,7 +10,7 @@ const discoverProps = (state = {
   isFetching: false,
   selectedState: '',
   recareas: [],
-  selectedRecarea: {},
+  selectedRecArea: null,
   facilities: []
 }, action) => {
   switch (action.type) {
@@ -19,7 +19,9 @@ const discoverProps = (state = {
         ...state,
         isFetching: true,
         recareas: [],
-        selectedState: action.state
+        selectedState: action.state,
+        selectedRecArea: null,
+        facilities: []
       }
     case FETCH_RECAREAS_SUCCESS:
       return {
