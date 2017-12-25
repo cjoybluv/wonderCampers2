@@ -9,7 +9,8 @@ import {
   Dialog,
   FlatButton,
   Chip,
-  Paper
+  Paper,
+  TextField
 } from 'material-ui';
 import {Card, CardText} from 'material-ui/Card';
 
@@ -33,8 +34,8 @@ function importAll(r) {
 const images = importAll(require.context('../images', false, /\.(png|jpe?g|svg)$/));
 
 const styles = {
- width200: {
-    width: "100%",
+ width100: {
+    width: "100%"
   },
   chip: {
     margin: 4,
@@ -52,7 +53,8 @@ class Discover extends Component {
       recareas: [],
       recAreaOpen: false,
       selectedRecArea: null,
-      facilities: []
+      facilities: [],
+      searchQuery: ''
     };
   }
 
@@ -74,6 +76,15 @@ class Discover extends Component {
     this.setState({selectedRecArea: value});
     this.props.setRecArea(value);
     this.props.fetchFacilities(value);
+  }
+
+  handleQuery = (event) => {
+    this.setState({searchQuery: event.target.value});
+  }
+
+  submitQuery = () => {
+    const { selectedState, searchQuery } = this.state;
+    this.props.fetchFacilitiesQuery(selectedState,searchQuery);
   }
 
   activityIconListItem = (activity, i) => {
@@ -214,7 +225,8 @@ class Discover extends Component {
       facilities,
       selectedState, 
       recAreaOpen,
-      selectedRecArea
+      selectedRecArea,
+      searchQuery
     } = this.state;
 
     const modalActions = [
@@ -236,7 +248,7 @@ class Discover extends Component {
         <span className="col-4">
           <div className="container">
             <SelectField
-              style={styles.width200}
+              style={styles.width100}
               floatingLabelText="Select State"
               value={selectedState}
               onChange={this.handleStateSelect}
@@ -249,12 +261,13 @@ class Discover extends Component {
             </SelectField>
           </div>
           <h4>Browse Facilities by:</h4>
-          {!isFetching && !!recareas.length &&
+          <div className="container">
             <SelectField 
-              style={styles.width200}
+              style={styles.width100}
               floatingLabelText="Select Recretional Area"
               value={selectedRecArea}
               onChange={this.handleRecAreaSelect}
+              disabled={isFetching || !recareas.length}
             >
               {recareas.map((recarea, idx) => {
                 return (
@@ -262,7 +275,21 @@ class Discover extends Component {
                 )
               })}
             </SelectField>
-          }
+          </div>
+
+          <div className="container">
+
+              <TextField 
+                style={styles.width100}
+                floatingLabelText="OR Enter Search Term"
+                floatingLabelFixed={true}
+                value={searchQuery}
+                onChange={this.handleQuery}
+                disabled={isFetching || !recareas.length}
+              />
+              <FlatButton type="submit" onClick={this.submitQuery} >Go</FlatButton>
+   
+          </div>
 
         </span>
         <span className="col-8">
@@ -319,7 +346,14 @@ class Discover extends Component {
           {!isFetching && !!facilities.length &&
             <div>
               <h3>
-               Facilities for: <strong>{ selectedRecArea.RecAreaName }</strong>:
+               Facilities for:&nbsp;
+               {selectedRecArea &&
+                <strong>{ selectedRecArea.RecAreaName }</strong>
+               }
+               {searchQuery &&
+                <strong>{ searchQuery }</strong>
+               }
+               &nbsp;({facilities.length})
               </h3>
               <div>
                 {this.renderFacilities()}

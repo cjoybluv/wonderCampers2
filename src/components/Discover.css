@@ -4,7 +4,7 @@
 
 .col-4 {
   display: inline-block;
-  width: 33%;
+  width: 30%;
   vertical-align: top;
   margin-right: 10px;
 }
@@ -25,6 +25,14 @@
 
 h4 {
   font-weight: 400;
+}
+
+.col-4 h4 {
+  margin-bottom: 0;
+}
+
+form button {
+  display: inline-block;
 }
 
 p {

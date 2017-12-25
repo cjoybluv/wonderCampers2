@@ -61,7 +61,7 @@ app.get('/api/recareas', (req, res) => {
 });
 
 app.get('/api/facilities', (req, res) => {
-  var facilityIDs = req.query.facilityIDs.split(',');
+  var facilityIDs = req.query.facilityIDs ? req.query.facilityIDs.split(',') : null;
   var state = req.query.state;
   var query = req.query.query;
   var radius = req.query.radius;
@@ -107,7 +107,8 @@ app.get('/api/facilities', (req, res) => {
 
 
   }
-  if (query) {
+  if (query && state) {
+    console.log('FACILITIES by State / Query:',state,query);
     var outOfData = false;
     var pageOffset = 0;
     var totalCount = 0;

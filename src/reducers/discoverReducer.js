@@ -3,7 +3,8 @@ import {
   FETCH_RECAREAS_SUCCESS, 
   RECAREA_SELECT,
   FETCH_FACILITIES_REQUEST,
-  FETCH_FACILITIES_SUCCESS
+  FETCH_FACILITIES_SUCCESS,
+  FETCH_FACILITIES_REQUEST_QUERY
 } from '../actions/discoverActions';
 
 const discoverProps = (state = {
@@ -45,6 +46,12 @@ const discoverProps = (state = {
         ...state,
         isFetching: false,
         facilities: action.facilities
+      }
+    case FETCH_FACILITIES_REQUEST_QUERY:
+      return {
+        ...state,
+        isFetching: true,
+        facilities: []
       }
     default:
       return state

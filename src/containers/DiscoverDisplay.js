@@ -2,7 +2,7 @@
 import { connect } from 'react-redux';
 
 import Discover from '../components/Discover';
-import { fetchRecAreas, setRecArea, fetchFacilities } from '../actions/discoverActions';
+import { fetchRecAreas, setRecArea, fetchFacilities, fetchFacilitiesQuery } from '../actions/discoverActions';
 
 const mapStateToDiscoverProps = (state) => (
   {
@@ -20,6 +20,9 @@ const mapDispatchToDiscoverProps = (dispatch) => (
     ),
     fetchFacilities: (selectedRecArea) => (
       dispatch(fetchFacilities(selectedRecArea))
+    ),
+    fetchFacilitiesQuery: (state,query) => (
+      dispatch(fetchFacilitiesQuery(state,query))
     ),
     dispatch: dispatch,
   }
