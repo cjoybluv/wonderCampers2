@@ -11,7 +11,8 @@ import {
   Chip,
   Paper,
   TextField,
-  Slider
+  Slider,
+  Checkbox
 } from 'material-ui';
 import {Card, CardText} from 'material-ui/Card';
 import Search from 'material-ui/svg-icons/action/search';
@@ -39,6 +40,10 @@ const styles = {
  width100: {
     width: "100%"
   },
+  campingOnly: {
+    display: "inline-table",
+    width: "65%"
+  },
   chip: {
     margin: 4,
     display: "inline-block"
@@ -60,6 +65,7 @@ class Discover extends Component {
       isFetching: false,
       selectedState: '', 
       recareas: [],
+      recAreasReturned: [],
       recAreaOpen: false,
       selectedRecArea: null,
       facilities: [],
@@ -75,7 +81,8 @@ class Discover extends Component {
     this.setState({
       isFetching: update.discoverProps.isFetching,
       recareas: update.discoverProps.recareas,
-      facilities: update.discoverProps.facilities
+      facilities: update.discoverProps.facilities,
+      recAreasReturned: update.discoverProps.recareas
     });
   }
 
@@ -84,6 +91,7 @@ class Discover extends Component {
       selectedState: value,
       facilities: [],
       recareas: [],
+      recAreasReturned: [],
       searchQuery: '',
       searchRadius: 20,
       searchPlacename: ''
@@ -123,6 +131,72 @@ class Discover extends Component {
     const { selectedState, searchRadius, searchPlacename } = this.state;
     this.props.fetchFacilitiesRadiusPlacename(selectedState,searchRadius,searchPlacename);
   }
+
+  handleCampingOnly = () => {
+    this.setState((oldState) => {
+      return {
+        campingOnly: !oldState.campingOnly,
+      };
+    },this.campingOnly);
+  }
+
+  campingOnly = () => {
+    const { facilities, recAreasReturned } = this.state;
+    if (facilities.length === 0) {
+      this.setState({ recareas: recAreasReturned.filter(this.recAreaActivityFilter) });
+    }
+  } 
+
+  recAreaActivityFilter = (ra) => {
+    const { campingOnly } = this.state;
+    var activityFound = false;
+    var hasCamping = false;
+    var filterCount = 0;
+    // var campingOnly = $scope.search.campingOnly;
+    // var filterCount = $scope.activityFilter.length;
+    if (typeof ra.ACTIVITY === 'object') {
+      // console.log('raFilter',ra.ACTIVITY);
+      for (var i=0;i<ra.ACTIVITY.length;i++) {
+        if (campingOnly) {
+          if (ra.ACTIVITY[i].ActivityID === 9) {
+            hasCamping = true;
+          }
+          if (filterCount > 0) {
+            // if ($scope.activityFilter.indexOf(ra.ACTIVITY[i].ActivityID) != -1) {
+            //   activityFound = true;
+            // }
+          } else {
+            activityFound = true;
+          }
+        } else {
+          // if ($scope.activityFilter.indexOf(ra.ACTIVITY[i].ActivityID) != -1) {
+            activityFound = true;
+          // }
+        }
+      }
+    }
+    var includeRec = false;
+    if (campingOnly) {
+      if (hasCamping) {
+        if (filterCount>0) {
+          if (activityFound) {
+            includeRec = true;
+          }
+        } else {
+          includeRec = true;
+        }
+      }
+    } else {
+      if (filterCount>0) {
+        if (activityFound) {
+          includeRec = true;
+        }
+      } else {
+        includeRec = true;
+      }
+    }
+    return includeRec;
+  };
 
   activityIconListItem = (activity, i) => {
     const iconName = 'acticon-'+activity.ActivityID.toString()+'.png';
@@ -346,7 +420,8 @@ class Discover extends Component {
       selectedRecArea,
       searchQuery,
       searchRadius,
-      searchPlacename
+      searchPlacename,
+      campingOnly
     } = this.state;
 
     const recAreaModalActions = [
@@ -379,6 +454,8 @@ class Discover extends Component {
 
     return (
       <div className="container">
+
+      {/* LOOKUP AREA */}
         <span className="col-4">
           <div className="container">
             <SelectField
@@ -452,7 +529,21 @@ class Discover extends Component {
               <FlatButton type="submit"><Search /></FlatButton>
             </form>
           </div>
+
+          <div className="container">
+            <Checkbox
+              label="Camping Only?"
+              checked={campingOnly}
+              onCheck={this.handleCampingOnly.bind(this)}
+              style={styles.campingOnly}
+            />
+            <section className="activity-icon">
+              <img src={images["acticon-9.png"]} alt={'Camping'} />
+            </section>
+          </div>
         </span>
+
+        {/* CONTENT AREA */}
         <span className="col-8">
           {isFetching && selectedState && !selectedRecArea && !searchQuery && !searchPlacename &&
             <h3>
