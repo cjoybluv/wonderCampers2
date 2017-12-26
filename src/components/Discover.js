@@ -13,6 +13,7 @@ import {
   TextField
 } from 'material-ui';
 import {Card, CardText} from 'material-ui/Card';
+import Search from 'material-ui/svg-icons/action/search';
 
 // import ShowMore from 'react-show-more';
 // import Truncate from 'react-truncate';
@@ -82,7 +83,8 @@ class Discover extends Component {
     this.setState({searchQuery: event.target.value});
   }
 
-  submitQuery = () => {
+  submitQuery = (e) => {
+    e.preventDefault();
     const { selectedState, searchQuery } = this.state;
     this.props.fetchFacilitiesQuery(selectedState,searchQuery);
   }
@@ -278,7 +280,7 @@ class Discover extends Component {
           </div>
 
           <div className="container">
-
+            <form onSubmit={(e) => this.submitQuery(e)}>
               <TextField 
                 style={styles.width100}
                 floatingLabelText="OR Enter Search Term"
@@ -287,13 +289,13 @@ class Discover extends Component {
                 onChange={this.handleQuery}
                 disabled={isFetching || !recareas.length}
               />
-              <FlatButton type="submit" onClick={this.submitQuery} >Go</FlatButton>
-   
+              <FlatButton type="submit"><Search /></FlatButton>
+            </form>
           </div>
 
         </span>
         <span className="col-8">
-          {isFetching && selectedState && !selectedRecArea &&
+          {isFetching && selectedState && !selectedRecArea && !searchQuery &&
             <h3>
               Recreational Areas in <strong>{ selectedState }</strong>:
               <div>
@@ -301,9 +303,11 @@ class Discover extends Component {
               </div>
             </h3>
           }
-          {isFetching && selectedRecArea &&
+          {isFetching && (selectedRecArea || searchQuery) &&
             <h3>
-              Facilities for: <strong>{ selectedRecArea.RecAreaName }</strong>:
+              Facilities for: 
+              {selectedRecArea && <strong>{ selectedRecArea.RecAreaName }</strong>}
+              {searchQuery && <strong>{ searchQuery }</strong>}
               <div>
                 <strong>LOADING...</strong>
               </div>
@@ -333,7 +337,7 @@ class Discover extends Component {
               <div><img src={mt_lake} height="250" alt="mountain lake" /></div>
             </div>
           }
-          {!isFetching && !!recareas.length && !facilities.length &&
+          {!isFetching && !!recareas.length && !facilities.length && !searchQuery &&
             <div>
                <h3>
                 Recreational Areas in <strong>{ selectedState }</strong>: ({ recareas.length })
@@ -343,21 +347,19 @@ class Discover extends Component {
               </div>      
             </div>
           }
-          {!isFetching && !!facilities.length &&
+          {!isFetching && (selectedRecArea || searchQuery) &&
             <div>
               <h3>
                Facilities for:&nbsp;
-               {selectedRecArea &&
-                <strong>{ selectedRecArea.RecAreaName }</strong>
-               }
-               {searchQuery &&
-                <strong>{ searchQuery }</strong>
-               }
+               {selectedRecArea && <strong>{ selectedRecArea.RecAreaName }</strong>}
+               {searchQuery && <strong>{ searchQuery }</strong>}
                &nbsp;({facilities.length})
               </h3>
-              <div>
-                {this.renderFacilities()}
-              </div>      
+              {!!facilities.length && 
+                <div>
+                  {this.renderFacilities()}
+                </div>      
+              }
             </div>
           }
         </span>
