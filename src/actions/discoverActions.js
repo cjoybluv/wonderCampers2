@@ -4,6 +4,7 @@ export const RECAREA_SELECT = 'RECAREA_SELECT';
 export const FETCH_FACILITIES_REQUEST = 'FETCH_FACILITIES_REQUEST';
 export const FETCH_FACILITIES_SUCCESS = 'FETCH_FACILITIES_SUCCESS';
 export const FETCH_FACILITIES_REQUEST_QUERY = 'FETCH_FACILITIES_REQUEST_QUERY';
+export const FETCH_FACILITIES_REQUEST_RADIUS_PLACENAME = 'FETCH_FACILITIES_REQUEST_RADIUS_PLACENAME';
 
 const requestRecAreas = state => ({
   type: FETCH_RECAREAS_REQUEST,
@@ -36,9 +37,17 @@ const requestFacilities = recArea => ({
   recArea
 })
 
-const requestFacilitiesQuery = query => ({
+const requestFacilitiesQuery = (state, query) => ({
   type: FETCH_FACILITIES_REQUEST_QUERY,
+  state,
   query
+})
+
+const requestFacilitiesRadiusPlacename = (state, radius, placename) => ({
+  type: FETCH_FACILITIES_REQUEST_RADIUS_PLACENAME,
+  state,
+  radius,
+  placename
 })
 
 const receiveFacilities = (facilities) => ({
@@ -63,8 +72,15 @@ var getFacilityIDs = function(recArea) {
 };
 
 export const fetchFacilitiesQuery = (state,query) => dispatch => {
-  dispatch(requestFacilitiesQuery(query))
+  dispatch(requestFacilitiesQuery(state,query))
   return fetch(`http://localhost:3001/api/facilities?state=${state}&query=${query}`)
+    .then((response) => response.json())
+    .then((json) =>dispatch(receiveFacilities(json)))
+}
+
+export const fetchFacilitiesRadiusPlacename = (state,radius,placename) => dispatch => {
+  dispatch(requestFacilitiesRadiusPlacename(state,radius,placename))
+  return fetch(`http://localhost:3001/api/facilities?state=${state}&radius=${radius}&placeName=${placename}`)
     .then((response) => response.json())
     .then((json) =>dispatch(receiveFacilities(json)))
 }

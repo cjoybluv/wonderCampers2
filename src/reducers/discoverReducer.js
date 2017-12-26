@@ -4,7 +4,8 @@ import {
   RECAREA_SELECT,
   FETCH_FACILITIES_REQUEST,
   FETCH_FACILITIES_SUCCESS,
-  FETCH_FACILITIES_REQUEST_QUERY
+  FETCH_FACILITIES_REQUEST_QUERY,
+  FETCH_FACILITIES_REQUEST_RADIUS_PLACENAME
 } from '../actions/discoverActions';
 
 const discoverProps = (state = {
@@ -22,7 +23,10 @@ const discoverProps = (state = {
         recareas: [],
         selectedState: action.state,
         selectedRecArea: null,
-        facilities: []
+        facilities: [],
+        searchQuery: '',
+        searchRadius: null,
+        searchPlacename: ''
       }
     case FETCH_RECAREAS_SUCCESS:
       return {
@@ -48,6 +52,7 @@ const discoverProps = (state = {
         facilities: action.facilities
       }
     case FETCH_FACILITIES_REQUEST_QUERY:
+    case FETCH_FACILITIES_REQUEST_RADIUS_PLACENAME:
       return {
         ...state,
         isFetching: true,

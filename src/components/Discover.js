@@ -10,7 +10,8 @@ import {
   FlatButton,
   Chip,
   Paper,
-  TextField
+  TextField,
+  Slider
 } from 'material-ui';
 import {Card, CardText} from 'material-ui/Card';
 import Search from 'material-ui/svg-icons/action/search';
@@ -42,6 +43,13 @@ const styles = {
     margin: 4,
     display: "inline-block"
   },
+  font20: {
+    fontSize: 20
+  },
+  slider: {
+    marginBottom: 0,
+    marginTop: 12
+  }
 };
 
 class Discover extends Component {
@@ -55,7 +63,9 @@ class Discover extends Component {
       recAreaOpen: false,
       selectedRecArea: null,
       facilities: [],
-      searchQuery: ''
+      searchQuery: '',
+      searchRadius: 20,
+      searchPlacename: ''
     };
   }
 
@@ -68,13 +78,22 @@ class Discover extends Component {
   }
 
   handleStateSelect = (event, index, value) => {
-    this.setState({selectedState: value});
+    this.setState({
+      selectedState: value,
+      facilities: [],
+      recareas: [],
+      searchQuery: '',
+      searchRadius: 20,
+      searchPlacename: ''
+    });
     this.setState({isFetching: true});
     this.props.fetchRecAreas(value);
   }
 
   handleRecAreaSelect = (event, index, value) => {
-    this.setState({selectedRecArea: value});
+    this.setState({
+      selectedRecArea: value
+    });
     this.props.setRecArea(value);
     this.props.fetchFacilities(value);
   }
@@ -87,6 +106,20 @@ class Discover extends Component {
     e.preventDefault();
     const { selectedState, searchQuery } = this.state;
     this.props.fetchFacilitiesQuery(selectedState,searchQuery);
+  }
+
+  handleRadius = (e, value) => {
+    this.setState({searchRadius: value});
+  }
+
+  handlePlacename = (e) => {
+    this.setState({searchPlacename: e.target.value});
+  }
+
+  submitRadiusPlacename = (e) => {
+    e.preventDefault();
+    const { selectedState, searchRadius, searchPlacename } = this.state;
+    this.props.fetchFacilitiesRadiusPlacename(selectedState,searchRadius,searchPlacename);
   }
 
   activityIconListItem = (activity, i) => {
@@ -228,7 +261,9 @@ class Discover extends Component {
       selectedState, 
       recAreaOpen,
       selectedRecArea,
-      searchQuery
+      searchQuery,
+      searchRadius,
+      searchPlacename
     } = this.state;
 
     const modalActions = [
@@ -262,6 +297,7 @@ class Discover extends Component {
               })}
             </SelectField>
           </div>
+
           <h4>Browse Facilities by:</h4>
           <div className="container">
             <SelectField 
@@ -280,11 +316,12 @@ class Discover extends Component {
           </div>
 
           <div className="container">
-            <form onSubmit={(e) => this.submitQuery(e)}>
+            <form id="searchQueryForm" onSubmit={(e) => this.submitQuery(e)}>
               <TextField 
                 style={styles.width100}
                 floatingLabelText="OR Enter Search Term"
                 floatingLabelFixed={true}
+                floatingLabelStyle={styles.font20}
                 value={searchQuery}
                 onChange={this.handleQuery}
                 disabled={isFetching || !recareas.length}
@@ -293,9 +330,34 @@ class Discover extends Component {
             </form>
           </div>
 
+          <div className="container">
+            <h4 className="dim">OR Enter Radius &amp; Placename</h4>
+            <form id="searchPlacenameForm" onSubmit={(e) => this.submitRadiusPlacename(e)}>
+              <Slider
+                min={0}
+                max={100}
+                step={1}
+                defaultValue={20}
+                value={searchRadius}
+                onChange={this.handleRadius}
+                sliderStyle={styles.slider}
+                disabled={isFetching || !recareas.length}
+              />
+              <label className="radius-label">{searchRadius}</label>
+              <TextField 
+                style={styles.width100}
+                floatingLabelText="Placename"
+                floatingLabelFixed={true}
+                value={searchPlacename}
+                onChange={this.handlePlacename}
+                disabled={isFetching || !recareas.length}
+              />
+              <FlatButton type="submit"><Search /></FlatButton>
+            </form>
+          </div>
         </span>
         <span className="col-8">
-          {isFetching && selectedState && !selectedRecArea && !searchQuery &&
+          {isFetching && selectedState && !selectedRecArea && !searchQuery && !searchPlacename &&
             <h3>
               Recreational Areas in <strong>{ selectedState }</strong>:
               <div>
@@ -303,7 +365,7 @@ class Discover extends Component {
               </div>
             </h3>
           }
-          {isFetching && (selectedRecArea || searchQuery) &&
+          {isFetching && (selectedRecArea || searchQuery || searchPlacename) &&
             <h3>
               Facilities for: 
               {selectedRecArea && <strong>{ selectedRecArea.RecAreaName }</strong>}
@@ -337,7 +399,7 @@ class Discover extends Component {
               <div><img src={mt_lake} height="250" alt="mountain lake" /></div>
             </div>
           }
-          {!isFetching && !!recareas.length && !facilities.length && !searchQuery &&
+          {!isFetching && !!recareas.length && !facilities.length && !searchQuery && !searchPlacename &&
             <div>
                <h3>
                 Recreational Areas in <strong>{ selectedState }</strong>: ({ recareas.length })
@@ -347,12 +409,13 @@ class Discover extends Component {
               </div>      
             </div>
           }
-          {!isFetching && (selectedRecArea || searchQuery) &&
+          {!isFetching && (selectedRecArea || searchQuery || searchPlacename) &&
             <div>
               <h3>
                Facilities for:&nbsp;
                {selectedRecArea && <strong>{ selectedRecArea.RecAreaName }</strong>}
                {searchQuery && <strong>{ searchQuery }</strong>}
+               {searchPlacename && <strong>within { searchRadius } miles from { searchPlacename }</strong>}
                &nbsp;({facilities.length})
               </h3>
               {!!facilities.length && 

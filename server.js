@@ -68,6 +68,7 @@ app.get('/api/facilities', (req, res) => {
   var placeName = req.query.placeName;
   var myData = [];
   var rqstParam = {};
+  console.log('FETCH FACILITIES:',facilityIDs,state,query,radius,placeName);
 
   if (!facilityIDs && !query && !radius) {
     return false;
@@ -152,13 +153,15 @@ app.get('/api/facilities', (req, res) => {
 
   }
 
-  if(radius && placeName) {
+  if(state && radius && placeName) {
+    console.log('FACILITIES by State / Radius / Placename:',state,radius,placeName);
     var coord = {};
     geocoder.geocode(placeName+", "+state, function ( err, data ) {
       if(typeof data.results[0] != 'undefined') {
         coord.lat = data.results[0].geometry.location.lat;
         coord.lng = data.results[0].geometry.location.lng;
       }
+      console.log('-- GeoCoord',JSON.stringify(coord));
 
       var outOfData = false;
       var pageOffset = 0;

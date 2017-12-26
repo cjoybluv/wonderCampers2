@@ -27,13 +27,38 @@ h4 {
   font-weight: 400;
 }
 
+.col-4 {
+  line-height: 0;
+}
+
 .col-4 h4 {
   margin-bottom: 0;
+}
+
+#searchQueryForm {
+  height: 60px;
+}
+
+#searchPlacenameForm {
+  height: 80px;
 }
 
 form button {
   top: -40px;
   left: 75%;
+}
+
+.radius-label {
+  position: relative;
+  left: 90%;
+  opacity: 0.3;
+}
+.dim {
+  opacity: 0.3;
+}
+
+form svg {
+  opacity: 0.3;
 }
 
 p {
