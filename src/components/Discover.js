@@ -63,6 +63,8 @@ class Discover extends Component {
       recAreaOpen: false,
       selectedRecArea: null,
       facilities: [],
+      facilityOpen: false,
+      selectedFacility: null,
       searchQuery: '',
       searchRadius: 20,
       searchPlacename: ''
@@ -137,7 +139,7 @@ class Discover extends Component {
       recAreaOpen: true,
       recArea
     });
-    this.props.setRecarea(recArea);
+    this.props.setRecArea(recArea);
   }
 
   closeRecArea = () => {
@@ -173,7 +175,7 @@ class Discover extends Component {
       <div className="modal">
         <h3>{recArea.RecAreaName} ({recArea.FACILITY.length})</h3>
 
-        <div className="recarea-address">
+        <div className="modal-address">
           <div className="col-6">
             <Card>
               <CardText>
@@ -223,8 +225,8 @@ class Discover extends Component {
         </Paper>
         <Paper>
           <h3>Links</h3>
-          {recArea.LINK.map((link) => 
-            <Chip style={styles.chip}>
+          {recArea.LINK.map((link, idx) => 
+            <Chip key={idx} style={styles.chip}>
               <a href={prepareURL(link.URL)} target="_blank">{link.Title}</a>
             </Chip>            
           )}
@@ -233,13 +235,25 @@ class Discover extends Component {
     )
   }
 
+  openFacility = (facility) => {
+    this.setState({
+      facilityOpen: true,
+      facility
+    });
+    this.props.setRecArea(facility);
+  }
+
+  closeFacility = () => {
+    this.setState({facilityOpen: false});
+  }
+
   renderFacilities() {
     const { facilities } = this.state;
     return (
       <List>
         {facilities.map((facility, i) =>
           <div key={i} >
-            <ListItem>
+            <ListItem onClick={this.openFacility.bind(this,facility)} >
               <div>
                 <h4>{facility.FacilityName}</h4>
                 <p dangerouslySetInnerHTML={{__html: facility.FacilityDescription}} />
@@ -253,6 +267,74 @@ class Discover extends Component {
     )
   }
 
+  renderFacilityModal() {
+    const { facility, facilityOpen } = this.state;
+    if (!facilityOpen || !facility) {
+      return null;
+    }
+
+    return (
+      <div className="modal">
+        <h3>{facility.FacilityName}</h3>
+
+        <div className="modal-address">
+          <div className="col-6">
+            <Card>
+              <CardText>
+                {facility.FACILITYADDRESS[0].FacilityStreetAddress1} <br/>
+                {facility.FACILITYADDRESS[0].City}, {facility.FACILITYADDRESS[0].AddressStateCode}   {facility.FACILITYADDRESS[0].PostalCode} <br/>
+                {facility.FacilityEmail} {facility.FacilityPhone}<br/>
+                {facility.FacilityMapURL &&
+                  <a href={prepareURL(facility.FacilityMapURL)} target="_blank">Goto Map</a>
+                }
+              </CardText>
+            </Card>
+          </div>
+          {facility.MEDIA[0] && facility.MEDIA[0].MediaType==='Image' &&
+            <div className="col-6">
+              <img src={facility.MEDIA[0].URL} alt="" />
+            </div>
+          }
+        </div>  
+        <div>
+          <Chip style={styles.chip}>
+            ACTIVITY: {facility.ACTIVITY.length}
+          </Chip>
+          <Chip style={styles.chip}>
+            LINK: {facility.LINK.length}
+          </Chip>
+          <Chip style={styles.chip}>
+            MEDIA: {facility.MEDIA.length}
+          </Chip>
+          <Chip style={styles.chip}>
+            EVENT: {facility.EVENT.length}
+          </Chip>
+        </div>
+        <Paper zDepth={1}>
+          <h3>Description</h3>
+          <p dangerouslySetInnerHTML={{__html: facility.FacilityDescription}} />
+          {facility.FacilityReservationURL && <div><a href={facility.FacilityReservationURL} target="_blank"><h4>Reservations</h4></a></div>}
+        </Paper>
+        <Paper zDepth={1}>
+          <h3>Directions</h3>
+          <p dangerouslySetInnerHTML={{__html: facility.FacilityDirections}} />
+        </Paper>
+        <Paper>
+          <h3>Activities</h3>
+          {facility.ACTIVITY.map(this.activityIconListItem)}
+        </Paper>
+        <Paper>
+          <h3>Links</h3>
+          {facility.LINK.map((link, idx) => 
+            <Chip key={idx} style={styles.chip}>
+              <a href={prepareURL(link.URL)} target="_blank">{link.Title}</a>
+            </Chip>            
+          )}
+        </Paper>
+      </div>
+    )
+  }
+
   render() {
     const { 
       isFetching, 
@@ -260,13 +342,14 @@ class Discover extends Component {
       facilities,
       selectedState, 
       recAreaOpen,
+      facilityOpen,
       selectedRecArea,
       searchQuery,
       searchRadius,
       searchPlacename
     } = this.state;
 
-    const modalActions = [
+    const recAreaModalActions = [
       <FlatButton
         label="Cancel"
         primary={true}
@@ -277,6 +360,20 @@ class Discover extends Component {
         primary={true}
         keyboardFocused={true}
         onClick={this.closeRecArea}
+      />,
+    ];
+
+    const facilityModalActions = [
+      <FlatButton
+        label="Cancel"
+        primary={true}
+        onClick={this.closeFacility}
+      />,
+      <FlatButton
+        label="Submit"
+        primary={true}
+        keyboardFocused={true}
+        onClick={this.closeFacility}
       />,
     ];
 
@@ -427,13 +524,22 @@ class Discover extends Component {
           }
         </span>
         <Dialog
-          actions={modalActions}
+          actions={recAreaModalActions}
           modal={false}
           open={recAreaOpen}
           onRequestClose={this.closeRecArea}
           autoScrollBodyContent={true}
         >
           {this.renderRecAreaModal()}
+        </Dialog>
+        <Dialog
+          actions={facilityModalActions}
+          modal={false}
+          open={facilityOpen}
+          onRequestClose={this.closeFacility}
+          autoScrollBodyContent={true}
+        >
+          {this.renderFacilityModal()}
         </Dialog>
       </div>
     )

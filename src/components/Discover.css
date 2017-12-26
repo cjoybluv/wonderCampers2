@@ -81,11 +81,11 @@ p {
   vertical-align: bottom;
 }
 
-.recarea-address {
+.modal-address {
   position: relative;
 }
 
-.recarea-address img {
+.modal-address img {
   max-width: 250px;
   vertical-align: top;
   float: right;
