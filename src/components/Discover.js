@@ -15,6 +15,7 @@ import {
   Checkbox
 } from 'material-ui';
 import {Card, CardText} from 'material-ui/Card';
+import {GridList, GridTile} from 'material-ui/GridList';
 import Search from 'material-ui/svg-icons/action/search';
 
 // import ShowMore from 'react-show-more';
@@ -54,8 +55,33 @@ const styles = {
   slider: {
     marginBottom: 0,
     marginTop: 12
+  },
+  gridList: {
+    width: "30%"
+  },
+  filterSelected: {
+    background: "lightgreen"
   }
 };
+
+
+const filterList = [
+  { "ActivityID": 5, "ActivityName": "BIKING" },
+  { "ActivityID": 6, "ActivityName": "BOATING" },
+  { "ActivityID": 11, "ActivityName": "FISHING" },
+  { "ActivityID": 14, "ActivityName": "HIKING" },
+  { "ActivityID": 16, "ActivityName": "HUNTING" },
+  { "ActivityID": 105, "ActivityName": "PADDLING" },
+  { "ActivityID": 20, "ActivityName": "PICNIC" },
+  { "ActivityID": 43, "ActivityName": "SNOWPARK" },
+  { "ActivityID": 25, "ActivityName": "SUMMER" },
+  { "ActivityID": 106, "ActivityName": "SWIMMING" },
+  { "ActivityID": 15, "ActivityName": "RIDING" },
+  { "ActivityID": 23, "ActivityName": "RV" },
+  { "ActivityID": 28, "ActivityName": "WILDERNESS" },
+  { "ActivityID": 26, "ActivityName": "WILDLIFE" },
+  { "ActivityID": 22, "ActivityName": "WINTER" }
+];
 
 class Discover extends Component {
 
@@ -69,11 +95,13 @@ class Discover extends Component {
       recAreaOpen: false,
       selectedRecArea: null,
       facilities: [],
+      facilitiesReturned: [],
       facilityOpen: false,
       selectedFacility: null,
       searchQuery: '',
       searchRadius: 20,
-      searchPlacename: ''
+      searchPlacename: '',
+      selectedActivityFilters: []
     };
   }
 
@@ -82,7 +110,8 @@ class Discover extends Component {
       isFetching: update.discoverProps.isFetching,
       recareas: update.discoverProps.recareas,
       facilities: update.discoverProps.facilities,
-      recAreasReturned: update.discoverProps.recareas
+      recAreasReturned: update.discoverProps.recareas,
+      facilitiesReturned: update.discoverProps.facilities
     });
   }
 
@@ -90,6 +119,7 @@ class Discover extends Component {
     this.setState({
       selectedState: value,
       facilities: [],
+      facilitiesReturned: [],
       recareas: [],
       recAreasReturned: [],
       searchQuery: '',
@@ -141,37 +171,73 @@ class Discover extends Component {
   }
 
   campingOnly = () => {
-    const { facilities, recAreasReturned } = this.state;
+    const { facilities, recAreasReturned, facilitiesReturned } = this.state;
     if (facilities.length === 0) {
-      this.setState({ recareas: recAreasReturned.filter(this.recAreaActivityFilter) });
+      this.setState({ recareas: recAreasReturned.filter(this.activityFilter) });
+    } else {
+      this.setState({ facilities: facilitiesReturned.filter(this.activityFilter) });
     }
   } 
 
-  recAreaActivityFilter = (ra) => {
-    const { campingOnly } = this.state;
+  handleFilterClick = (e) => {
+    const { isFetching, recAreasReturned } = this.state;
+    if (isFetching || !recAreasReturned.length) {
+      return true;
+    }
+    let activityID;
+    if (e.target.getAttribute("value")) {
+      activityID = parseInt(e.target.getAttribute("value"),10)
+    } else {
+      activityID = parseInt(e.target.parentNode.getAttribute("value"),10)
+    }
+    const idx = this.state.selectedActivityFilters.indexOf(activityID);
+    const existingFilters = this.state.selectedActivityFilters;
+    if (idx === -1) {
+      this.setState({selectedActivityFilters: existingFilters.concat(activityID)},this.resetFilters)
+    } else {
+      this.setState({selectedActivityFilters: existingFilters.slice(0,idx).concat(existingFilters.slice(idx+1)) },this.resetFilters)
+    }
+  }
+
+  isActivitySelected = (activityID) => {
+    return this.state.selectedActivityFilters.indexOf(activityID) !== -1;
+  }
+
+  resetFilters = () => {
+    const { recAreasReturned, facilitiesReturned } = this.state;
+    if (facilitiesReturned.length === 0) {
+      this.setState({ recareas: recAreasReturned.filter(this.activityFilter) });
+    } else {
+      this.setState({ facilities: facilitiesReturned.filter(this.activityFilter) });
+    }
+  }
+
+  activityFilter = (ra) => {
+    const { campingOnly, selectedActivityFilters } = this.state;
     var activityFound = false;
     var hasCamping = false;
-    var filterCount = 0;
-    // var campingOnly = $scope.search.campingOnly;
-    // var filterCount = $scope.activityFilter.length;
+
+    var filterCount = selectedActivityFilters.length;
+
+    // console.log('raFilter',selectedActivityFilters);
     if (typeof ra.ACTIVITY === 'object') {
-      // console.log('raFilter',ra.ACTIVITY);
+      
       for (var i=0;i<ra.ACTIVITY.length;i++) {
         if (campingOnly) {
           if (ra.ACTIVITY[i].ActivityID === 9) {
             hasCamping = true;
           }
           if (filterCount > 0) {
-            // if ($scope.activityFilter.indexOf(ra.ACTIVITY[i].ActivityID) != -1) {
-            //   activityFound = true;
-            // }
+            if (selectedActivityFilters.indexOf(ra.ACTIVITY[i].ActivityID) !== -1) {
+              activityFound = true;
+            }
           } else {
             activityFound = true;
           }
         } else {
-          // if ($scope.activityFilter.indexOf(ra.ACTIVITY[i].ActivityID) != -1) {
+          if (selectedActivityFilters.indexOf(ra.ACTIVITY[i].ActivityID) !== -1) {
             activityFound = true;
-          // }
+          }
         }
       }
     }
@@ -331,7 +397,7 @@ class Discover extends Component {
               <div>
                 <h4>{facility.FacilityName}</h4>
                 <p dangerouslySetInnerHTML={{__html: facility.FacilityDescription}} />
-                {false && facility.ACTIVITY.map(this.activityIconListItem)}
+                {facility.ACTIVITY.map(this.activityIconListItem)}
               </div>
               {(i+1 !== facilities.length) && <Divider />}
             </ListItem>
@@ -413,7 +479,9 @@ class Discover extends Component {
     const { 
       isFetching, 
       recareas, 
+      recAreasReturned,
       facilities,
+      facilitiesReturned,
       selectedState, 
       recAreaOpen,
       facilityOpen,
@@ -536,10 +604,36 @@ class Discover extends Component {
               checked={campingOnly}
               onCheck={this.handleCampingOnly.bind(this)}
               style={styles.campingOnly}
+              disabled={isFetching || !recAreasReturned.length}
             />
             <section className="activity-icon">
               <img src={images["acticon-9.png"]} alt={'Camping'} />
             </section>
+          </div>
+
+          <div className="container">
+            <GridList 
+              cellHeight={72}
+              cols={3}
+            >
+              {filterList.map((activity, idx) => (
+                <GridTile
+                  key={idx}
+                  value={activity.ActivityID}
+                  titleBackground='rgba(0,0,0,0)'
+                  className={"activity-icon"}
+                  onClick={this.handleFilterClick.bind(this)}
+                  style={this.isActivitySelected(activity.ActivityID) ? styles.filterSelected : null}
+                >
+                  <img 
+                    className="grid-image"
+                    src={images['acticon-'+activity.ActivityID+'.png']} 
+                    alt={activity.ActivityName}
+                  />
+                  <label className="grid-label">{activity.ActivityName}</label>
+                </GridTile>
+              ))}
+            </GridList>
           </div>
         </span>
 
@@ -563,7 +657,7 @@ class Discover extends Component {
               </div>
             </h3>
           }
-          {!isFetching && !recareas.length &&
+          {!isFetching && !recAreasReturned.length &&
             <div>
 
               <h3>Welcome to Wonder Campers - Discover App.</h3>
@@ -587,7 +681,7 @@ class Discover extends Component {
               <div><img src={mt_lake} height="250" alt="mountain lake" /></div>
             </div>
           }
-          {!isFetching && !!recareas.length && !facilities.length && !searchQuery && !searchPlacename &&
+          {!isFetching && !!recAreasReturned.length && !facilitiesReturned.length && !searchQuery && !searchPlacename &&
             <div>
                <h3>
                 Recreational Areas in <strong>{ selectedState }</strong>: ({ recareas.length })
