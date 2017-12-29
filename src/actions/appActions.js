@@ -10,7 +10,8 @@ const requestUserSignup = user => ({
 
 const userSignupSuccess = user => ({
   type: USER_SIGNUP_SUCCESS,
-  user
+  user,
+  message: 'You have been successfully Signed-up for wonderCampers!'
 })
 
 export const postUserSignup = user => dispatch => {

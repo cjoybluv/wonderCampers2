@@ -11,12 +11,15 @@ import {
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import { 
   AppBar, 
-  Drawer, 
+  Drawer,
+  Menu,
   MenuItem, 
-  RaisedButton,
   FlatButton,
+  IconButton,
   Dialog,
-  TextField
+  TextField,
+  Popover,
+  Snackbar
 } from 'material-ui';
 
 import logo from '../images/REI-logo-transparent.png';
@@ -35,7 +38,10 @@ class App extends Component {
     super(props);
     this.state = {
       drawerOpen: false,
+      anchorEl: null,
+      userMenuOpen: false,
       signupOpen: false,
+      snackbarOpen: false,
       userSignup: {
         firstName: '',
         lastName: '',
@@ -53,8 +59,27 @@ class App extends Component {
 
   toggleDrawer = () => this.setState({drawerOpen: !this.state.drawerOpen});
 
+  componentWillReceiveProps(update) {
+    this.setState({
+      user: update.appProps.user,
+      message: update.appProps.message
+    });
+    if (update.appProps.message) {
+      this.setState({snackbarOpen: true});
+    }
+  }
+
   render() {
-    const { drawerOpen, signupOpen, loginOpen } = this.state;
+    const { 
+      drawerOpen, 
+      signupOpen, 
+      loginOpen,
+      userMenuOpen,
+      anchorEl,
+      snackbarOpen,
+      user,
+      message
+    } = this.state;
 
     const signupActions = [
       <FlatButton
@@ -93,7 +118,17 @@ class App extends Component {
                   className="AppBar"
                   onLeftIconButtonClick={this.toggleDrawer}
                   title={<div><img src={logo} alt="logo" /><span className="app-title">wonderCampers</span></div>}
-                  iconElementRight={<div><RaisedButton onClick={this.openSignup}>SignUp</RaisedButton><RaisedButton onClick={this.openLogin}>Login</RaisedButton></div>}
+                  // iconElementRight={<div><RaisedButton onClick={this.openSignup}>SignUp</RaisedButton><RaisedButton onClick={this.openLogin}>Login</RaisedButton></div>}
+                  iconElementRight={
+                    <div>
+                      {!!user && 
+                        <span>Hello {user.firstName}</span>
+                      }
+                      <IconButton onClick={this.openUserMenu} >
+                        <i className="material-icons md-36">person</i>
+                      </IconButton>
+                    </div>
+                  }
                 >
                   
                   <Drawer open={drawerOpen} >
@@ -118,6 +153,18 @@ class App extends Component {
                 </Switch>
               </div>
             </Router>
+            <Popover
+              open={userMenuOpen}
+              anchorEl={anchorEl}
+              anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
+              targetOrigin={{horizontal: 'right', vertical: 'top'}}
+              onRequestClose={this.closeUserMenu}
+            >
+              <Menu>
+                <MenuItem primaryText="Signup" onClick={this.openSignup} />
+                <MenuItem primaryText="Login" onClick={this.openLogin} />
+              </Menu>
+            </Popover>
             <Dialog
               actions={signupActions}
               modal={false}
@@ -136,13 +183,43 @@ class App extends Component {
             >
               {this.renderLogin()}
             </Dialog>
+            {!!message &&
+              <Snackbar
+                open={snackbarOpen}
+                message={message}
+                autoHideDuration={4000}
+                onRequestClose={this.closeSnackbar}
+              />
+            }
           </div>
         </MuiThemeProvider>
     );
   }
 
+  openUserMenu = (e) => {
+    e.preventDefault();
+    this.setState({
+      userMenuOpen: true,
+      anchorEl: e.currentTarget,
+    });
+  }
+
+  closeUserMenu = () => {
+    this.setState({userMenuOpen: false});
+  }
+
+  closeSnackbar = () => {
+    this.setState({
+      snackbarOpen: false,
+      message: ''
+    });
+  }
+
   openSignup = () => {
-    this.setState({signupOpen: true});
+    this.setState({
+      signupOpen: true,
+      userMenuOpen: false
+    });
   }
 
   closeSignup = () => {
@@ -155,8 +232,8 @@ class App extends Component {
     this.setState({ userSignup });
   }
 
-  submitSignup = () => {
-    console.log('submitSignup',this.state.userSignup);
+  submitSignup = (e) => {
+    e.preventDefault();
     const { firstName, lastName, email, password, passwordConfirm } = this.state.userSignup;
     if (password && (password === passwordConfirm)) {
       this.props.postUserSignup({firstName, lastName, email, password});
@@ -215,7 +292,10 @@ class App extends Component {
   }
 
   openLogin = () => {
-    this.setState({loginOpen: true});
+    this.setState({
+      loginOpen: true,
+      userMenuOpen: false
+    });
   }
 
   closeLogin = () => {
@@ -228,8 +308,8 @@ class App extends Component {
     this.setState({ userLogin });
   }
 
-  submitLogin = () => {
-    console.log('submitLogin',this.state.userLogin);
+  submitLogin = (e) => {
+    e.preventDefault();
     const { email, password } = this.state.userLogin;
 
     this.props.postUserLogin({ email, password });
