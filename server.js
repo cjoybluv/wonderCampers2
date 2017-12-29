@@ -1,16 +1,26 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const request = require('request');
 const async = require('async');
 const geocoder = require('geocoder');
+const bcrypt = require('bcrypt');
+
+const stitch = require("mongodb-stitch");
+const client = new stitch.StitchClient('wondercampers-hdghh');
+const db = client.service('mongodb', 'mongodb-atlas').db('wonderCampers');
 
 const app = express();
 
 app.set('port', (process.env.API_PORT || 3001));
 
-app.use((req, res, next) => {
-  res.append('Access-Control-Allow-Origin', ['*']);
+app.use(function(req, res, next) {
+  res.setHeader("Access-Control-Allow-Origin", 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Methods', 'POST,GET,OPTIONS,PUT,DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Accept');
   next();
 });
+
+const jsonParser = bodyParser.json();
 
 app.get('/api/info', (req, res) => {
   res.json({"hello": "Hello World!"})
@@ -208,6 +218,29 @@ app.get('/api/facilities', (req, res) => {
 
     }); // geocoder
   }
+});
+
+
+app.post('/api/signup', jsonParser, (req,res) => {
+  console.log('signup',req.body);
+  const { email } = req.body;
+  // bcrypt.hash(values.password,10,function(err,hash){
+  try {
+    client.login().then(() =>
+      db.collection('users').updateOne(
+        { "email" : email },
+        { $set: req.body },
+        { upsert: true }
+      ).then((res) => {
+        return res;
+      })
+    ).catch(err => {
+      console.error('SIGNUP ERROR:',err);
+    });
+  } catch (e) {
+    console.error('LOGIN ERROR:',e);
+  }
+  res.send();
 });
 
 
