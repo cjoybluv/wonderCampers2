@@ -6,9 +6,9 @@ const requestUserSignup = user => ({
   user
 })
 
-const userSignupSuccess = response => ({
+const userSignupSuccess = user => ({
   type: USER_SIGNUP_SUCCESS,
-  response
+  user
 })
 
 export const postUserSignup = user => dispatch => {
@@ -18,7 +18,8 @@ export const postUserSignup = user => dispatch => {
       body: JSON.stringify(user), 
       headers:  {'Content-Type': "application/json"}
     }
-  ).then((response) => dispatch(userSignupSuccess(response)))
+  ).then((res) => res.json()
+  ).then((user) => dispatch(userSignupSuccess(user)))
 }
 
 // fetch("/echo/json/",

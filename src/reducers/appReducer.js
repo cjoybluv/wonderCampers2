@@ -15,8 +15,10 @@ const appProps = (state = {
     case USER_SIGNUP_SUCCESS:
       return {
         ...state,
-        response: action.response
+        user: action.user
       }
+    default:
+      return state
   }
 }
 

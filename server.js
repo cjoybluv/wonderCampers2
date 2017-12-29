@@ -222,25 +222,33 @@ app.get('/api/facilities', (req, res) => {
 
 
 app.post('/api/signup', jsonParser, (req,res) => {
-  console.log('signup',req.body);
-  const { email } = req.body;
-  // bcrypt.hash(values.password,10,function(err,hash){
+  console.log('SIGNUP REQUEST',req.body);
+  const { firstName, lastName, email, password } = req.body;
+  const users = db.collection('users');
+  
   try {
-    client.login().then(() =>
-      db.collection('users').updateOne(
-        { "email" : email },
-        { $set: req.body },
-        { upsert: true }
-      ).then((res) => {
-        return res;
-      })
-    ).catch(err => {
+    client.login().then(() => {
+      // bcrypt.hash(values.password,10,function(err,hash){
+      bcrypt.hash(password,10,(err, hash) => {
+        const user = {firstName, lastName, email, password: hash};
+          users.updateOne(
+            { "email" : email },
+            { $set: user },
+            { upsert: true }
+          ).then((response) => {
+            users.find({_id: response.upsertedId}, null).execute().then(function(user) {
+              console.log('SIGNUP SUCCESS',response.upsertedId);
+              res.send(user[0]);
+            });
+          })
+      });
+    }).catch(err => {
       console.error('SIGNUP ERROR:',err);
+      res.send({error: err});
     });
   } catch (e) {
     console.error('LOGIN ERROR:',e);
   }
-  res.send();
 });
 
 
