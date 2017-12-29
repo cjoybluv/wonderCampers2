@@ -124,7 +124,9 @@ class Discover extends Component {
       recAreasReturned: [],
       searchQuery: '',
       searchRadius: 20,
-      searchPlacename: ''
+      searchPlacename: '',
+      campingOnly: false,
+      selectedActivityFilters: []
     });
     this.setState({isFetching: true});
     this.props.fetchRecAreas(value);

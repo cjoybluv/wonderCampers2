@@ -161,8 +161,17 @@ class App extends Component {
               onRequestClose={this.closeUserMenu}
             >
               <Menu>
-                <MenuItem primaryText="Signup" onClick={this.openSignup} />
-                <MenuItem primaryText="Login" onClick={this.openLogin} />
+                {!user && 
+                  <div>
+                    <MenuItem primaryText="Signup" onClick={this.openSignup} />
+                    <MenuItem primaryText="Login" onClick={this.openLogin} />
+                  </div>
+                }
+                {user &&
+                  <div>
+                    <MenuItem primaryText="Logout" onClick={this.logout} />
+                  </div>
+                }
               </Menu>
             </Popover>
             <Dialog
@@ -194,6 +203,14 @@ class App extends Component {
           </div>
         </MuiThemeProvider>
     );
+  }
+
+  logout = (e) => {
+    e.preventDefault();
+    this.setState({
+      user: null,
+      userMenuOpen: false
+    });
   }
 
   openUserMenu = (e) => {
@@ -272,6 +289,7 @@ class App extends Component {
             value={email}
             name="email"
             onChange={this.handleSignupInput}
+            type="email"
           />
           <TextField 
             floatingLabelText="Password"
@@ -333,6 +351,7 @@ class App extends Component {
             value={email}
             name="email"
             onChange={this.handleLoginInput}
+            type="email"
           />
           <TextField 
             floatingLabelText="Password"
@@ -340,6 +359,7 @@ class App extends Component {
             value={password}
             name="password"
             onChange={this.handleLoginInput}
+            type="password"
           />
       </div>
     )
