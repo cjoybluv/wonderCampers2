@@ -27,7 +27,7 @@ import DiscoverDisplay from './DiscoverDisplay';
 import Example from './Example';
 
 import {
-  postUserSignup
+  postUserSignup, postUserLogin
 } from '../actions/appActions'
 
 class App extends Component {
@@ -42,6 +42,11 @@ class App extends Component {
         email: '',
         password: '',
         passwordConfirm: ''
+      },
+      loginOpen: false,
+      userLogin: {
+        email: '',
+        password: ''
       }
     };
   }
@@ -49,7 +54,7 @@ class App extends Component {
   toggleDrawer = () => this.setState({drawerOpen: !this.state.drawerOpen});
 
   render() {
-    const { drawerOpen, signupOpen } = this.state;
+    const { drawerOpen, signupOpen, loginOpen } = this.state;
 
     const signupActions = [
       <FlatButton
@@ -65,6 +70,19 @@ class App extends Component {
       />,
     ];
     
+    const loginActions = [
+      <FlatButton
+        label="Cancel"
+        primary={true}
+        onClick={this.closeLogin}
+      />,
+      <FlatButton
+        label="Submit"
+        primary={true}
+        keyboardFocused={true}
+        onClick={this.submitLogin}
+      />,
+    ];
 
     return (
         <MuiThemeProvider>
@@ -75,7 +93,7 @@ class App extends Component {
                   className="AppBar"
                   onLeftIconButtonClick={this.toggleDrawer}
                   title={<div><img src={logo} alt="logo" /><span className="app-title">wonderCampers</span></div>}
-                  iconElementRight={<div><RaisedButton onClick={this.openSignup}>SignUp</RaisedButton><RaisedButton>Login</RaisedButton></div>}
+                  iconElementRight={<div><RaisedButton onClick={this.openSignup}>SignUp</RaisedButton><RaisedButton onClick={this.openLogin}>Login</RaisedButton></div>}
                 >
                   
                   <Drawer open={drawerOpen} >
@@ -109,6 +127,15 @@ class App extends Component {
             >
               {this.renderSignup()}
             </Dialog>
+            <Dialog
+              actions={loginActions}
+              modal={false}
+              open={loginOpen}
+              onRequestClose={this.closeLogin}
+              autoScrollBodyContent={true}
+            >
+              {this.renderLogin()}
+            </Dialog>
           </div>
         </MuiThemeProvider>
     );
@@ -122,7 +149,7 @@ class App extends Component {
     this.setState({signupOpen: false});
   }
 
-  handleInput = (e) => {
+  handleSignupInput = (e) => {
     const userSignup = this.state.userSignup;
     userSignup[e.target.name] = e.target.value;
     this.setState({ userSignup });
@@ -153,40 +180,93 @@ class App extends Component {
             floatingLabelFixed={true}
             value={firstName}
             name="firstName"
-            onChange={this.handleInput}
+            onChange={this.handleSignupInput}
           />
           <TextField 
             floatingLabelText="Last Name"
             floatingLabelFixed={true}
             value={lastName}
             name="lastName"
-            onChange={this.handleInput}
+            onChange={this.handleSignupInput}
           />
           <TextField 
             floatingLabelText="Email"
             floatingLabelFixed={true}
             value={email}
             name="email"
-            onChange={this.handleInput}
+            onChange={this.handleSignupInput}
           />
           <TextField 
             floatingLabelText="Password"
             floatingLabelFixed={true}
             value={password}
             name="password"
-            onChange={this.handleInput}
+            onChange={this.handleSignupInput}
           />
           <TextField 
             floatingLabelText="Confirm Password"
             floatingLabelFixed={true}
             value={passwordConfirm}
             name="passwordConfirm"
-            onChange={this.handleInput}
+            onChange={this.handleSignupInput}
+          />
+      </div>
+    )
+  }
+
+  openLogin = () => {
+    this.setState({loginOpen: true});
+  }
+
+  closeLogin = () => {
+    this.setState({loginOpen: false});
+  }
+
+  handleLoginInput = (e) => {
+    const userLogin = this.state.userLogin;
+    userLogin[e.target.name] = e.target.value;
+    this.setState({ userLogin });
+  }
+
+  submitLogin = () => {
+    console.log('submitLogin',this.state.userLogin);
+    const { email, password } = this.state.userLogin;
+
+    this.props.postUserLogin({ email, password });
+    this.closeLogin();
+  }
+
+  renderLogin() {
+    const { loginOpen } = this.state;
+    const { email, password } = this.state.userLogin;
+  
+    if (!loginOpen) {
+      return null;
+    }
+
+    return (
+      <div className="modal">
+        <h3>Login to wonderCampers!</h3>
+          <TextField 
+            floatingLabelText="Email"
+            floatingLabelFixed={true}
+            value={email}
+            name="email"
+            onChange={this.handleLoginInput}
+          />
+          <TextField 
+            floatingLabelText="Password"
+            floatingLabelFixed={true}
+            value={password}
+            name="password"
+            onChange={this.handleLoginInput}
           />
       </div>
     )
   }
 }
+
+
 
 // export default App;
 const mapStateToAppProps = (state) => (
@@ -199,6 +279,9 @@ const mapDispatchToAppProps = (dispatch) => (
   {
     postUserSignup: (user) => (
       dispatch(postUserSignup(user))
+    ),
+    postUserLogin: (user) => (
+      dispatch(postUserLogin(user))
     ),
     dispatch: dispatch,
   }

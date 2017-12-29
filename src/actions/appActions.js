@@ -1,5 +1,7 @@
 export const USER_SIGNUP_REQUEST = 'USER_SIGNUP_REQUEST';
 export const USER_SIGNUP_SUCCESS = 'USER_SIGNUP_SUCCESS';
+export const USER_LOGIN_REQUEST = 'USER_LOGIN_REQUEST';
+export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS';
 
 const requestUserSignup = user => ({
   type: USER_SIGNUP_REQUEST,
@@ -20,6 +22,27 @@ export const postUserSignup = user => dispatch => {
     }
   ).then((res) => res.json()
   ).then((user) => dispatch(userSignupSuccess(user)))
+}
+
+const requestUserLogin = user => ({
+  type: USER_LOGIN_REQUEST,
+  user
+})
+
+const userLoginSuccess = user => ({
+  type: USER_LOGIN_SUCCESS,
+  user
+})
+
+export const postUserLogin = user => dispatch => {
+  dispatch(requestUserLogin(user))
+  return fetch('http://localhost:3001/api/login',
+    { method: 'POST',
+      body: JSON.stringify(user),
+      headers: {'Content-Type': "application/json"}
+    }
+  ).then((res) => res.json()
+  ).then((user) => dispatch(userLoginSuccess(user)))
 }
 
 // fetch("/echo/json/",

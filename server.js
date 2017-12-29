@@ -247,10 +247,39 @@ app.post('/api/signup', jsonParser, (req,res) => {
       res.send({error: err});
     });
   } catch (e) {
-    console.error('LOGIN ERROR:',e);
+    console.error('CLIENT LOGIN ERROR:',e);
   }
 });
 
+app.post('/api/login', jsonParser, (req, res) => {
+  console.log('LOGIN REQUEST', req.body);
+  const { email, password } = req.body;
+  const users = db.collection('users');
+
+  try {
+    client.login().then(() => {
+      users.find({email: email}, null).execute().then((user) => {
+        // bcrypt.compare(req.body.password, user.password, function(err, result){
+        bcrypt.compare(password, user[0].password, (err, result) => {
+
+          if(err) return res.send({result:false, error: err});
+          if(result){
+            console.log('LOGIN SUCCESS',user[0]);
+            res.send(user[0]);
+          }else{
+            res.send({
+              result:false,
+              error: 'Invalid Password.'
+            });
+          }
+
+        });
+      });
+    });
+  } catch (e) {
+    console.error('CLIENT LOGIN ERROR',e);
+  }
+});
 
 app.listen(app.get('port'), () => {
   console.log(`Find the server at: http://localhost:${app.get('port')}/`); // eslint-disable-line no-console
