@@ -3,7 +3,7 @@ import { Paper } from 'material-ui';
 
 import './Home.css';
 import Home_girlHandPaint from '../images/Home_girlHandPaint.jpg';
-import Home_campleaders_group from '../images/Home_campleaders_group.jpg';
+// import Home_campleaders_group from '../images/Home_campleaders_group.jpg';
 import Splash_LovingOutdoors from '../images/Splash-LovingOutdoors.jpg';
 import Home_girlscanoe from '../images/Home_girlscanoe.jpg';
 

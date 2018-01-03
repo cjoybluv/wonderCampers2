@@ -27,7 +27,11 @@ import './App.css';
 
 import Home from './Home';
 import DiscoverDisplay from './DiscoverDisplay';
-import Example from './Example';
+import Trips from './Trips';
+import Locations from './Locations';
+import Activities from './Activities';
+import Forms from './Forms';
+import Documents from './Documents';
 
 import {
   postUserSignup, postUserLogin
@@ -118,7 +122,6 @@ class App extends Component {
                   className="AppBar"
                   onLeftIconButtonClick={this.toggleDrawer}
                   title={<div><img src={logo} alt="logo" /><span className="app-title">wonderCampers</span></div>}
-                  // iconElementRight={<div><RaisedButton onClick={this.openSignup}>SignUp</RaisedButton><RaisedButton onClick={this.openLogin}>Login</RaisedButton></div>}
                   iconElementRight={
                     <div>
                       {!!user && 
@@ -138,16 +141,26 @@ class App extends Component {
                     <MenuItem onClick={this.toggleDrawer} >
                       <Link to="/discover">Discover</Link>
                     </MenuItem>
-                    <MenuItem onClick={this.toggleDrawer} >
-                      <Link to="/plan">Plan</Link>
-                    </MenuItem>
+                    <MenuItem primaryText={'Plan'}
+                      menuItems={[
+                        <MenuItem onClick={this.toggleDrawer}><Link to="/trips">Trips</Link></MenuItem>,
+                        <MenuItem onClick={this.toggleDrawer}><Link to="/locations">Locations</Link></MenuItem>,
+                        <MenuItem onClick={this.toggleDrawer}><Link to="/activities">Activities</Link></MenuItem>,
+                        <MenuItem onClick={this.toggleDrawer}><Link to="/forms">Forms</Link></MenuItem>,
+                        <MenuItem onClick={this.toggleDrawer}><Link to="/documents">Documents</Link></MenuItem>
+                      ]}
+                    />
                     <MenuItem onClick={this.toggleDrawer} >Close</MenuItem>
                   </Drawer>
                   
                 </AppBar>
                 <Switch>
                   <Route path="/discover" component={DiscoverDisplay} />
-                  <Route path="/plan" component={Example} />
+                  <Route path="/trips" component={Trips} />
+                  <Route path="/locations" component={Locations} />
+                  <Route path="/activities" component={Activities} />
+                  <Route path="/forms" component={Forms} />
+                  <Route path="/documents" component={Documents} />
                   <Route exact path="/" component={Home} />
                   
                 </Switch>
